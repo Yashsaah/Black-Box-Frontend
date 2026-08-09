@@ -144,24 +144,6 @@ export const projects = [
 // PLACEHOLDER emails and GitHub handles — swap these for the real ones.
 export const team = [
   {
-    name: "Garima Bartaula",
-    role: "Member",
-    featured: true,
-    affiliation: "Recent A-Level graduate",
-    photo: "/portraits/garima-bartaula.jpg",
-    photo2x: "/portraits/garima-bartaula@2x.jpg",
-    bio: [
-      "Garima is a recent A-Level graduate, currently in the business of finding what she likes and following her curiosity. Her world swings between literature, physics, and mathematics — anything that balances deep creative thought with sharp logic.",
-      "She takes complex ideas, quietly pieces them together, and turns them into clear, structured plans.",
-    ],
-    areasLabel: "Curious about",
-    areas: ["Literature", "Physics", "Mathematics", "Structured thinking"],
-    offHours:
-      "Otherwise she's lost in a good book, collecting random facts. As the saying goes, we write to live life twice — she takes that fairly literally.",
-    email: "garima@blackbox.dev",
-    github: "garimabartaula",
-  },
-  {
     name: "Yash Kumar Sah",
     role: "Member",
     featured: true,
@@ -182,7 +164,7 @@ export const team = [
     name: "Nimansh Dahal",
     role: "Member",
     featured: true,
-    affiliation: "US applicant",
+    affiliation: "Physics & mathematics enthusiast",
     photo: "/portraits/nimansh-dahal.jpg",
     photo2x: "/portraits/nimansh-dahal@2x.jpg",
     bio: [
@@ -196,6 +178,24 @@ export const team = [
     motto: "Let's get more passionate each day.",
     email: "nimansh@blackbox.dev",
     github: "nimanshdahal",
+  },
+  {
+    name: "Garima Bartaula",
+    role: "Member",
+    featured: true,
+    affiliation: "Recent A-Level graduate",
+    photo: "/portraits/garima-bartaula.jpg",
+    photo2x: "/portraits/garima-bartaula@2x.jpg",
+    bio: [
+      "Garima is a recent A-Level graduate, currently in the business of finding what she likes and following her curiosity. Her world swings between literature, physics, and mathematics — anything that balances deep creative thought with sharp logic.",
+      "She takes complex ideas, quietly pieces them together, and turns them into clear, structured plans.",
+    ],
+    areasLabel: "Curious about",
+    areas: ["Literature", "Physics", "Mathematics", "Structured thinking"],
+    offHours:
+      "Otherwise she's lost in a good book, collecting random facts. As the saying goes, we write to live life twice — she takes that fairly literally.",
+    email: "garima@blackbox.dev",
+    github: "garimabartaula",
   },
   {
     name: "Kripesh Raj Sharma",
