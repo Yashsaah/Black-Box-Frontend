@@ -6,7 +6,6 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Team from "./pages/Team";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
-import About from "./pages/About";
 import Contact from "./pages/Contact";
 import TryModel from "./pages/TryModel";
 
@@ -20,7 +19,6 @@ export default function App() {
         <Route path="team" element={<Team />} />
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:slug" element={<BlogPost />} />
-        <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="try" element={<TryModel />} />
         <Route path="*" element={<BlogPost />} />

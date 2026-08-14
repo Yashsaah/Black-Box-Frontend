@@ -269,6 +269,55 @@ export const contact = {
   github: "blackbox-ai",
 };
 
+// The programme this group was built inside. Kept short on purpose — the home
+// page introduces Incubate, then hands over to what our own cohort did.
+export const incubate = {
+  name: "Incubate Nepal",
+  url: "https://www.incubatenepal.com/",
+  tagline: "Connecting young minds in Nepal to create and explore",
+  logo: "/incubate-nepal.png",
+  blurb: [
+    "Incubate Nepal is an eight-week virtual programme founded by MIT and Harvard graduates to open up research-grade opportunities for students in Nepal. It takes high school students, pairs them with accomplished mentors, and puts them on small cohorts working on open-ended problems across science, engineering, economics and the humanities.",
+    "Every team ships something real — a research paper or a working prototype — and presents it at a showcase at the end. It is free to attend, and it is where this group met.",
+  ],
+};
+
+export const cohort = {
+  eyebrow: "Cohort 2026 · one of the teams",
+  title: "Team Black Box",
+  intro: [
+    "Six students and two mentors, given eight weeks and one question: what is actually happening inside a trained network? Not how to use one — what it is doing, and why it works at all on data it has never seen.",
+    "We researched neural network generalization, interpretability and efficiency along three threads — Double Descent, Grad-CAM and the Lottery Ticket Hypothesis. Each one attacks the same question from a different side: when a model stops learning and starts memorising, what a decision actually rested on, and how much of a network is doing the work.",
+    "We trained the models ourselves rather than importing results, reproduced every finding from the notebook before writing it up, and published the runs that failed next to the ones that worked. The failures are usually the part worth reading.",
+  ],
+};
+
+// The three threads the cohort pulled on. Each one gets a live figure on the
+// home page; the full writeups live under /projects.
+export const research = [
+  {
+    id: "double-descent",
+    label: "Generalization",
+    title: "Double Descent",
+    body: "Test error falls, rises at the interpolation threshold, then falls again — past the point where the textbook curve says it should only get worse. We reproduced the second descent and looked for where it starts.",
+    pen: "var(--pen-fit)",
+  },
+  {
+    id: "grad-cam",
+    label: "Interpretability",
+    title: "Grad-CAM",
+    body: "Gradients flowing into the last convolutional layer, turned into a heatmap over the input. It shows which pixels a decision actually rested on — including the times the network was right for the wrong reason.",
+    pen: "var(--pen-over)",
+  },
+  {
+    id: "lth",
+    label: "Efficiency",
+    title: "Lottery Ticket Hypothesis",
+    body: "Inside a dense network there is a sparse subnetwork that, trained from the same initialisation, matches the full model. We pruned iteratively to find the winning ticket and measured what was left.",
+    pen: "var(--pen-under)",
+  },
+];
+
 export const posts = [
   {
     slug: "plot-both-losses",

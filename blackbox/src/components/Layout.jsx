@@ -1,23 +1,23 @@
 import { useEffect } from "react";
 import { NavLink, Outlet, Link, useLocation } from "react-router-dom";
 import useInView from "../lib/useInView";
+import Boot from "./Boot";
 import ThemeToggle from "./ThemeToggle";
 
 const links = [
   ["/projects", "Projects"],
   ["/team", "Team"],
   ["/blog", "Blog"],
-  ["/about", "About"],
   ["/contact", "Contact"],
 ];
 
 // variant: rise | fade | wipe | scale
-export function Reveal({ children, variant = "rise", delay = 0, style, ...rest }) {
+export function Reveal({ children, variant = "rise", delay = 0, style, className = "", ...rest }) {
   const [ref, inView] = useInView();
   return (
     <div
       ref={ref}
-      className={`r r--${variant} ${inView ? "is-in" : ""}`}
+      className={`r r--${variant} ${inView ? "is-in" : ""} ${className}`}
       style={{ "--d": `${delay}ms`, ...style }}
       {...rest}
     >
@@ -35,6 +35,7 @@ export default function Layout() {
 
   return (
     <>
+      <Boot />
       <header className="nav">
         <div className="shell nav__inner">
           <div className="nav__lead">

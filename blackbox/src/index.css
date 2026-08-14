@@ -17,18 +17,28 @@
   --bg: #07080a;
   --panel: #0c0e12;
   --panel-2: #11141a;
-  --grid: rgba(255, 255, 255, 0.045);
   --grid-strong: rgba(255, 255, 255, 0.1);
   --ink: #f4f2ee;
   --muted: #b2b8c2;
   --faint: #7e848e;
 
-  --pen-under: #e9a23b;
+  --pen-under: #a78bfa;
   --pen-fit: #35d0b6;
   --pen-over: #f2569a;
-  --signal: #ff6b4a;
-  --signal-soft: rgba(255, 107, 74, 0.16);
-  --signal-line: rgba(255, 107, 74, 0.5);
+  --signal: #3fb6ff;
+  --signal-soft: rgba(63, 182, 255, 0.16);
+  --signal-line: rgba(63, 182, 255, 0.5);
+
+  --wash-a: rgba(63, 182, 255, 0.09);
+  --wash-b: rgba(53, 208, 182, 0.05);
+  --grain: 0.03;
+
+  /* The box stays black in both themes — inverting it would invert the point.
+     Lifted off the panel colour so the silhouette still reads on near-black. */
+  --box-face: #151a22;
+  --box-top: #242c37;
+  --box-side: #0d1117;
+  --box-edge: rgba(255, 255, 255, 0.18);
 
   --nav-bg: rgba(7, 8, 10, 0.72);
   --scrim-mid: rgba(7, 8, 10, 0.55);
@@ -41,29 +51,38 @@
   color-scheme: dark;
 }
 
-/* Warm paper rather than flat white — the graph-paper grid needs a ground
-   to sit on, and pure #fff blows out the plot inks. */
+/* Warm paper rather than flat white — pure #fff blows out the plot inks and
+   leaves the point field with nothing to sit on. */
 :root[data-theme="light"] {
   --bg: #f6f4f0;
   --panel: #fdfcfa;
   --panel-2: #eeebe4;
-  --grid: rgba(18, 22, 28, 0.055);
   --grid-strong: rgba(18, 22, 28, 0.135);
   --ink: #14171c;
   --muted: #545a64;
   --faint: #676d78;
 
   /* Pens re-mixed for paper — the dark-mode inks all land under 4.5:1 here. */
-  --pen-under: #9a5c07;
+  --pen-under: #6d28d9;
   --pen-fit: #087a68;
   --pen-over: #c8256a;
-  --signal: #c93a15;
-  --signal-soft: rgba(201, 58, 21, 0.13);
-  --signal-line: rgba(201, 58, 21, 0.42);
+  --signal: #0a6499;
+  --signal-soft: rgba(10, 100, 153, 0.13);
+  --signal-line: rgba(10, 100, 153, 0.42);
+
+  --wash-a: rgba(10, 100, 153, 0.07);
+  --wash-b: rgba(8, 122, 104, 0.05);
+  --grain: 0.022;
+
+  /* Lifted a little off pure black so it still reads as an object on paper. */
+  --box-face: #1b2028;
+  --box-top: #2a313b;
+  --box-side: #141820;
+  --box-edge: rgba(255, 255, 255, 0.2);
 
   --nav-bg: rgba(246, 244, 240, 0.78);
   --scrim-mid: rgba(246, 244, 240, 0.58);
-  --dot-glow: 0 0 0 3px rgba(201, 58, 21, 0.15);
+  --dot-glow: 0 0 0 3px rgba(10, 100, 153, 0.15);
   --tile-blend: multiply;
   --tile-glow: 0.1;
   --edge-boost: 2.4;
@@ -88,16 +107,37 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 28px 28px;
   color: var(--ink);
   font-family: var(--body);
   font-size: 18px;
   line-height: 1.65;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
+}
+
+/* The ground: two very slow washes rather than a ruled grid. They sit behind
+   everything, don't scroll, and are near-invisible individually — the point is
+   that the page never reads as a flat fill. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(72% 56% at 82% 4%, var(--wash-a), transparent 68%),
+    radial-gradient(64% 52% at 4% 88%, var(--wash-b), transparent 70%);
+}
+
+/* A fine grain over the top, so large flat areas keep some tooth. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 a { color: inherit; }
@@ -147,6 +187,9 @@ h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
 }
 
 .mono { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.02em; }
+
+/* Body paragraphs that follow a .lede — a step down, same measure. */
+.copy { color: var(--muted); font-size: 1rem; margin: 18px 0 0; }
 
 /* ---------- structure ---------- */
 
@@ -262,6 +305,24 @@ h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
 .nav__link:hover { color: var(--ink); background: var(--panel-2); }
 .nav__link[aria-current="page"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--signal); }
 
+/* Below this the row can't hold the wordmark and every link, so the links
+   drop to their own line and scroll sideways rather than wrapping into a
+   ragged block. */
+@media (max-width: 720px) {
+  .nav__inner { flex-wrap: wrap; height: auto; padding-block: 12px; gap: 10px; }
+  .mark { white-space: nowrap; }
+  .nav__links {
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+  }
+  .nav__links::-webkit-scrollbar { display: none; }
+  .nav__link { white-space: nowrap; flex: none; }
+}
+
 /* ---------- forward-pass hero ---------- */
 
 .hero {
@@ -292,37 +353,6 @@ h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
 
 .hero__copy { position: relative; z-index: 2; width: 100%; }
 
-.fp { position: absolute; inset: 0; }
-
-.fp canvas { display: block; width: 100%; height: 100%; }
-
-.fp__corner {
-  position: absolute;
-  width: 12px; height: 12px;
-  border: 1px solid var(--grid-strong);
-}
-.fp__corner--tl { top: 18px; left: 18px; border-right: 0; border-bottom: 0; }
-.fp__corner--tr { top: 18px; right: 18px; border-left: 0; border-bottom: 0; }
-.fp__corner--bl { bottom: 18px; left: 18px; border-right: 0; border-top: 0; }
-.fp__corner--br { bottom: 18px; right: 18px; border-left: 0; border-top: 0; }
-
-.fp__tag, .fp__arch {
-  position: absolute;
-  bottom: 22px;
-  font-size: 0.66rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--signal);
-}
-.fp__tag { left: 40px; display: inline-flex; align-items: center; gap: 9px; }
-.fp__arch { right: 40px; color: var(--faint); }
-
-.fp__blink {
-  width: 5px; height: 5px;
-  background: var(--signal);
-  border-radius: 50%;
-  animation: blink 1.6s steps(1, end) infinite;
-}
 @keyframes blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.15; } }
 
 /* ---------- fit canvas ---------- */
@@ -465,6 +495,41 @@ h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
   filter: var(--photo-filter);
   flex: none;
 }
+
+/* ---------- team roster ----------
+   The whole masthead for the team page: who mentors, who the mentees are, in
+   portrait order. Wraps by name rather than mid-name. */
+
+.roster { display: grid; gap: 16px; margin-top: 4px; }
+
+.roster__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.roster__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.roster__label::after { content: ":"; margin-left: 3px; }
+
+.roster__name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.1rem, 1.9vw, 1.45rem);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.roster__item { display: inline-flex; align-items: baseline; gap: 14px; }
+.roster__bar { width: 1px; height: 1.05em; background: var(--signal-line); align-self: center; flex: none; }
 
 /* ---------- lead mentor ---------- */
 
@@ -907,4 +972,465 @@ h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
   border: 1px solid var(--grid-strong);
   border-left: 3px solid var(--signal);
   padding: clamp(28px, 5vw, 56px);
+}
+
+/* ================= cold open ================= */
+
+html.is-booting, html.is-booting body { overflow: hidden; }
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  transition: transform 0.9s var(--ease);
+}
+.boot.is-out { transform: translateY(-101%); }
+
+.boot__inner { width: min(520px, 80vw); transition: opacity 0.35s ease; }
+.boot.is-out .boot__inner { opacity: 0; }
+
+.boot__word {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin: 0 0 26px;
+  white-space: nowrap;
+}
+.boot__outline { color: transparent; -webkit-text-stroke: 1.5px var(--faint); }
+@supports not ((-webkit-text-stroke: 1px red)) {
+  .boot__outline { color: var(--faint); }
+}
+.boot__solid { color: var(--ink); position: relative; }
+.boot__dot {
+  position: absolute;
+  right: -0.42em;
+  bottom: 0.16em;
+  width: 0.14em;
+  height: 0.14em;
+  background: var(--signal);
+  box-shadow: var(--dot-glow);
+}
+
+.boot__bar { height: 1px; background: var(--grid-strong); overflow: hidden; }
+.boot__bar i { display: block; height: 100%; background: var(--signal); transform-origin: left; }
+
+.boot__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 14px 0 0;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.66rem;
+}
+.boot__n { color: var(--signal); font-variant-numeric: tabular-nums; }
+
+/* ================= cinematic hero ================= */
+
+/* Minus the sticky nav, so the scroll cue at the bottom lands on screen
+   instead of one bar-height below it. */
+.hero--cine {
+  min-height: calc(100svh - 66px);
+  border-bottom: 0;
+}
+
+.hero__viz--full { inset: 0; }
+
+.field { position: absolute; inset: 0; }
+.field canvas { display: block; width: 100%; height: 100%; }
+
+.field__hud {
+  position: absolute;
+  right: clamp(20px, 5vw, 56px);
+  bottom: 26px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  color: var(--faint);
+  font-size: 0.63rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.field__blip {
+  width: 5px;
+  height: 5px;
+  background: var(--signal);
+  border-radius: 50%;
+  animation: blink 1.6s steps(1, end) infinite;
+}
+.field__form { color: var(--ink); }
+.field__step { color: var(--signal); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) { .field__form { display: none; } }
+
+/* Text side stays fully legible; the cloud lives to the right of it. */
+.hero__scrim--cine {
+  background:
+    linear-gradient(90deg, var(--bg) 0%, var(--bg) 44%, var(--scrim-mid) 60%, transparent 84%),
+    linear-gradient(180deg, var(--bg) 0%, transparent 16%, transparent 72%, var(--bg) 100%);
+}
+
+.hero__scrollcue {
+  position: absolute;
+  z-index: 2;
+  left: var(--gutter);
+  bottom: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--faint);
+  font-size: 0.63rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.hero__scrollcue i {
+  display: block;
+  width: 46px;
+  height: 1px;
+  background: var(--signal);
+  animation: cue 2.4s var(--ease) infinite;
+}
+@keyframes cue {
+  0% { transform: scaleX(0); transform-origin: left; }
+  45% { transform: scaleX(1); transform-origin: left; }
+  55% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+
+/* ================= incubate lockup ================= */
+
+/* Sits above the mark: who this is, before whose programme it was built in. */
+/* Block-level flex, not inline — the lockup below is inline-flex and would
+   otherwise ride up onto this line. */
+.hero__kicker {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 26px;
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.hero__kicker i { width: 34px; height: 1px; background: var(--signal); flex: none; }
+.hero__kicker b { font-weight: 500; color: var(--ink); }
+
+.caps { text-transform: uppercase; letter-spacing: -0.02em; }
+
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  margin-bottom: 26px;
+}
+
+/* The supplied mark is a square with a lot of air around it, so it is scaled
+   up inside the circle and the empty margin cropped away. */
+.lockup__badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  display: block;
+  box-shadow: 0 0 0 1px var(--grid-strong), 0 6px 22px rgba(0, 0, 0, 0.28);
+  transition: transform 0.5s var(--ease), box-shadow 0.4s var(--ease);
+}
+/* 118% crops the dead margin without pushing the wordmark past the chord. */
+.lockup__badge img { display: block; width: 118%; height: 118%; margin: -9%; object-fit: cover; }
+.lockup:hover .lockup__badge { transform: scale(1.06); box-shadow: 0 0 0 1px var(--signal-line), 0 8px 26px rgba(0, 0, 0, 0.34); }
+
+.lockup__meta {
+  display: grid;
+  gap: 3px;
+  font-size: 0.63rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.lockup__meta b { font-weight: 500; color: var(--muted); transition: color 0.25s; }
+.lockup:hover .lockup__meta b { color: var(--signal); }
+
+.hero__title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4.4vw, 3.1rem);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.hero__phrase {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.05rem, 1.9vw, 1.35rem);
+  letter-spacing: -0.015em;
+  color: var(--signal);
+  margin: 18px 0 0;
+  max-width: 34ch;
+}
+
+/* Kept short so the column never runs under the point cloud. */
+.hero__note { margin-top: 30px; max-width: 46ch; }
+.hero__note p { color: var(--muted); font-size: 0.98rem; margin: 0 0 1em; }
+.hero__note p:last-child { margin-bottom: 0; }
+
+/* The generic hero breakpoint stacks the canvas below the copy; the cinematic
+   one keeps it full-bleed behind the text at every width. */
+@media (max-width: 900px) {
+  .hero--cine { display: flex; padding-block: 0; min-height: 86svh; }
+  .hero--cine .hero__viz--full {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    min-height: 0;
+    margin-top: 0;
+  }
+  .hero--cine .hero__scrim--cine {
+    display: block;
+    background: linear-gradient(180deg, transparent 0%, var(--scrim-mid) 17%, var(--bg) 58%);
+  }
+}
+
+/* ================= buttons ================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--grid-strong);
+  border-radius: 2px;
+  padding: 13px 20px;
+  /* Fill wipes in from the left instead of a flat colour swap. */
+  background-image: linear-gradient(var(--signal), var(--signal));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition: background-size 0.45s var(--ease), color 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+.btn:hover { background-size: 100% 100%; color: var(--bg); border-color: var(--signal); }
+.btn__go { transition: transform 0.4s var(--ease); }
+.btn:hover .btn__go { transform: translateX(5px); }
+
+.btn--solid { background-size: 100% 100%; color: var(--bg); border-color: var(--signal); }
+.btn--solid:hover { background-size: 0% 100%; color: var(--ink); border-color: var(--grid-strong); }
+
+/* ================= black box flow ================= */
+
+.split-grid--flow {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
+  align-items: center;
+}
+@media (max-width: 960px) { .split-grid--flow { grid-template-columns: 1fr; } }
+
+.bbf { margin: 0; }
+
+.bbf__stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--panel);
+  border: 1px solid var(--grid-strong);
+  overflow: hidden;
+}
+.bbf__stage canvas { display: block; width: 100%; height: 100%; }
+
+/* Registration marks, the same ones the portraits and plots carry. */
+.bbf__tick {
+  position: absolute;
+  width: 10px; height: 10px;
+  border: 1px solid var(--signal-line);
+  opacity: 0.7;
+}
+.bbf__tick--tl { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+.bbf__tick--tr { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
+.bbf__tick--bl { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
+.bbf__tick--br { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+
+.bbf__label {
+  position: absolute;
+  bottom: 34px;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.bbf__label--in { left: 26px; }
+.bbf__label--out { right: 26px; color: var(--signal); }
+
+.bbf figcaption {
+  font-size: 0.7rem;
+  color: var(--faint);
+  border-top: 1px solid var(--grid-strong);
+  border-width: 0 1px 1px;
+  border-style: solid;
+  border-color: var(--grid-strong);
+  margin: 0;
+  padding: 11px 14px;
+}
+
+/* ================= research pillars ================= */
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--grid-strong);
+  border: 1px solid var(--grid-strong);
+  margin-top: 44px;
+}
+
+/* .pillar is also a Reveal, which owns the element's transition — the hover
+   wash therefore lives on a pseudo-element rather than on background here. */
+.pillar { background: var(--panel); padding: 26px 24px 30px; position: relative; overflow: hidden; }
+.pillar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--panel-2);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+.pillar:hover::after { opacity: 1; }
+.pillar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--pen);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.5s var(--ease);
+  z-index: 2;
+}
+.pillar:hover::before { transform: scaleY(1); }
+.pillar > * { position: relative; z-index: 1; }
+
+.pillar__fig { border: 1px solid var(--grid-strong); background: var(--bg); padding: 10px; }
+.pillar__label {
+  color: var(--pen);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.65rem;
+  margin: 22px 0 8px;
+}
+.pillar__title { margin: 0; }
+.pillar__body { color: var(--muted); font-size: 0.96rem; margin: 12px 0 0; }
+
+/* ================= live figures ================= */
+
+.fig { display: block; width: 100%; height: auto; color: var(--pen); overflow: visible; }
+
+.fig__t {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--faint);
+  opacity: 0;
+  transition: opacity 0.6s var(--ease) 1.9s;
+}
+.fig__t--r { text-anchor: end; }
+.fig.is-in .fig__t { opacity: 1; }
+
+/* double descent — the curve traces itself, then the threshold drops in */
+.fig__axis { fill: none; stroke: var(--grid-strong); stroke-width: 1; }
+.fig__curve {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.9s var(--ease) 0.15s;
+}
+.fig.is-in .fig__curve { stroke-dashoffset: 0; }
+
+.fig__thresh {
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 1;
+  stroke-dasharray: 0.024 0.03;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease) 1.5s;
+}
+.fig.is-in .fig__thresh { opacity: 0.75; }
+
+.fig__dot {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.4s 1.6s, transform 0.55s var(--ease) 1.6s;
+}
+.fig__dot--2 { transition-delay: 2s; }
+.fig.is-in .fig__dot { opacity: 1; transform: none; }
+
+/* grad-cam — the heatmap blooms outward from the hot cell, then breathes */
+.fig__frame { fill: none; stroke: var(--grid-strong); stroke-width: 1; }
+.fig__cell {
+  fill: currentColor;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.7);
+  transition: opacity 0.8s var(--ease);
+}
+.fig.is-in .fig__cell { opacity: var(--o); animation: heatPulse 3.6s var(--ease) infinite; }
+@keyframes heatPulse {
+  0%, 100% { transform: scale(0.7); }
+  50% { transform: scale(1); }
+}
+.fig__cross {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease) 1.2s;
+}
+.fig.is-in .fig__cross { opacity: 0.95; }
+
+/* lottery ticket — the dense graph prunes down to the surviving path */
+.fig__e {
+  stroke: var(--faint);
+  stroke-width: 1;
+  opacity: 0.5;
+  transition: opacity 0.9s var(--ease), stroke-width 0.9s var(--ease);
+}
+.fig.is-in .fig__e { opacity: 0.1; }
+.fig.is-in .fig__e--keep {
+  opacity: 1;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  animation: ticket 2.6s var(--ease) 1.4s infinite;
+}
+@keyframes ticket {
+  0%, 100% { stroke-opacity: 0.5; }
+  50% { stroke-opacity: 1; }
+}
+.fig__n { fill: var(--faint); opacity: 0.75; }
+
+@media (prefers-reduced-motion: reduce) {
+  .boot { display: none; }
+  .fig__cell { transform: none; }
+  .fig__dot { transform: none; opacity: 1; }
+  .fig__curve { stroke-dashoffset: 0; }
+  .fig__t, .fig__thresh, .fig__cross { opacity: 1; }
 }

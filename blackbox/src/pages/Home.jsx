@@ -1,134 +1,115 @@
-import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
-import ForwardPass from "../components/ForwardPass";
-import FitCanvas from "../components/FitCanvas";
+import BlackBoxFlow from "../components/BlackBoxFlow";
+import LatentField from "../components/LatentField";
+import ResearchFigure from "../components/ResearchFigure";
 import SplitText from "../components/SplitText";
-import Tile from "../components/Tile";
 import { Reveal } from "../components/Layout";
-import { projects, team, mentors } from "../data/content";
-
-function Line({ children, i }) {
-  return (
-    <span className="line">
-      <span className="line__inner" style={{ "--i": i }}>
-        {children}
-      </span>
-    </span>
-  );
-}
+import { cohort, incubate, mentors, research, team } from "../data/content";
 
 export default function Home() {
-  const [regime, setRegime] = useState({ label: "Good fit", pen: "var(--pen-fit)" });
-  const onRegimeChange = useCallback((m) => setRegime(m), []);
-
   return (
     <>
-      <section className="hero">
-        <div className="hero__viz">
-          <ForwardPass />
+      <section className="hero hero--cine">
+        <div className="hero__viz hero__viz--full">
+          <LatentField />
         </div>
-        <div className="hero__scrim" aria-hidden="true" />
+        <div className="hero__scrim hero__scrim--cine" aria-hidden="true" />
 
         <div className="shell hero__copy">
-          <p className="eyebrow line__inner" style={{ "--i": 0 }}>
-            Six members · two mentors · 2026
+          <p className="hero__kicker mono line__inner" style={{ "--i": 0 }}>
+            <i aria-hidden="true" />
+            Cohort 2026:
+            <b>Team Black Box</b>
           </p>
-          <h1 className="display" style={{ maxWidth: "13ch" }}>
-            <Line i={1}>Every model is a</Line>
-            <Line i={2}>
-              <span style={{ color: "var(--signal)" }}>black box</span>
-            </Line>
-            <Line i={3}>until you open it.</Line>
+
+          <a
+            className="lockup line__inner"
+            style={{ "--i": 1 }}
+            href={incubate.url}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <span className="lockup__badge">
+              <img src={incubate.logo} alt="" width="1080" height="1080" />
+            </span>
+            <span className="lockup__meta mono">
+              Built at
+              <b>incubatenepal.com ↗</b>
+            </span>
+          </a>
+
+          <h1 className="hero__title line__inner" style={{ "--i": 2 }}>
+            Incubate Nepal
           </h1>
-          <p className="lede line__inner" style={{ "--i": 5, maxWidth: "42ch" }}>
-            So we opened ours. We train models, break them on purpose, and publish the plots that show
-            exactly where the learning went wrong.
+
+          <p className="hero__phrase line__inner" style={{ "--i": 3 }}>
+            Connecting young minds in Nepal to create and explore
           </p>
-          <p className="line__inner" style={{ "--i": 6, marginTop: 30 }}>
-            <Link to="/projects" className="pen" style={{ textDecoration: "none" }}>
-              Read the projects →
-            </Link>
-          </p>
+
+          <div className="hero__note">
+            {incubate.blurb.map((p, i) => (
+              <p className="line__inner" style={{ "--i": 4 + i }} key={i}>
+                {p}
+              </p>
+            ))}
+          </div>
         </div>
+
+        <span className="hero__scrollcue mono" aria-hidden="true">
+          <i />
+          Scroll
+        </span>
       </section>
 
       <section className="band shell">
-        <div className="split-grid">
+        <div className="split-grid split-grid--flow">
           <div>
             <Reveal variant="fade">
-              <p className="eyebrow">Flagship · running live</p>
+              <p className="eyebrow">{cohort.eyebrow}</p>
             </Reveal>
-            <SplitText as="h2" className="display" text="The moment a model stops learning" />
-            <Reveal variant="fade" delay={220}>
-              <p className="lede">
-                This is our Y-shaped dataset, fitted in your browser right now — no pre-rendered
-                image. Watch the curve go from too rigid, to right, to chasing noise. The readout is
-                doing real least squares.
-              </p>
-            </Reveal>
-            <Reveal variant="rise" delay={320}>
-              <p className="mono" style={{ color: "var(--muted)", marginTop: 24 }}>
-                Currently drawing:{" "}
-                <span style={{ color: regime.pen }}>{regime.label.toLowerCase()}</span>
-              </p>
-            </Reveal>
+            <SplitText as="h2" className="display caps" text={cohort.title} />
+            {cohort.intro.map((p, i) => (
+              <Reveal key={i} variant="fade" delay={200 + i * 90}>
+                <p className={i === 0 ? "lede" : "copy"}>{p}</p>
+              </Reveal>
+            ))}
           </div>
 
-          <Reveal variant="scale" delay={160}>
-            <FitCanvas onRegimeChange={onRegimeChange} />
+          <Reveal variant="scale" delay={180}>
+            <BlackBoxFlow />
           </Reveal>
         </div>
-      </section>
 
-      <hr className="rule" />
-
-      <section className="band shell">
-        <Reveal variant="fade">
-          <p className="eyebrow">The work</p>
-        </Reveal>
-        <SplitText as="h2" className="display" text="Three projects, one habit" />
-        <Reveal variant="fade" delay={200}>
-          <p className="lede">
-            Plot the training loss and the test loss together, or don't plot anything. Each project
-            below ends where the two curves disagree.
-          </p>
-        </Reveal>
-
-        <div className="grid-3" style={{ marginTop: 40 }}>
-          {projects.map((p, i) => (
-            <Tile key={p.slug} p={p} delay={i * 110} />
+        <div className="pillars">
+          {research.map((r, i) => (
+            <Reveal
+              key={r.id}
+              variant="rise"
+              delay={i * 140}
+              className="pillar"
+              style={{ "--pen": r.pen }}
+            >
+              <div className="pillar__fig">
+                <ResearchFigure id={r.id} />
+              </div>
+              <p className="pillar__label mono">{r.label}</p>
+              <h3 className="display pillar__title">{r.title}</h3>
+              <p className="pillar__body">{r.body}</p>
+            </Reveal>
           ))}
         </div>
+
+        <Reveal variant="fade" delay={240}>
+          <p style={{ marginTop: 42 }}>
+            <Link to="/projects" className="btn btn--solid">
+              Read the writeups
+              <span className="btn__go" aria-hidden="true">
+                →
+              </span>
+            </Link>
+          </p>
+        </Reveal>
       </section>
-
-      <hr className="rule" />
-
-      <section className="band shell">
-        <div className="tm__highlight">
-          <div>
-            <Reveal variant="fade">
-              <p className="eyebrow" style={{ color: "var(--signal)" }}>Try the model · interactive</p>
-            </Reveal>
-            <SplitText as="h2" className="display" text="See where the network is looking" />
-            <Reveal variant="fade" delay={200}>
-              <p className="lede">
-                Upload any image and get back a heatmap of the pixels our CNN leaned on to decide.
-                It runs in your browser as a demo, or against our live model once connected.
-              </p>
-            </Reveal>
-            <Reveal variant="rise" delay={300}>
-              <p style={{ marginTop: 28 }}>
-                <Link to="/try" className="pen" style={{ textDecoration: "none" }}>
-                  <span className="pen__swatch" style={{ background: "var(--signal)" }} />
-                  Upload an image →
-                </Link>
-              </p>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      <hr className="rule" />
 
       <section className="band--tight band shell">
         <Reveal variant="wipe">

@@ -1,6 +1,4 @@
-import SplitText from "../components/SplitText";
 import { Reveal } from "../components/Layout";
-import { Link } from "react-router-dom";
 import { team, mentors } from "../data/content";
 
 const initials = (n) => n.split(" ").map((w) => w[0]).join("");
@@ -84,19 +82,41 @@ export default function Team() {
   const otherMentors = mentors.filter((m) => !m.lead);
   const featured = team.filter((p) => p.featured);
   const rest = team.filter((p) => !p.featured);
+  // Mentees read in the same order their portraits appear further down.
+  const mentees = [...featured, ...rest];
 
   return (
     <section className="band shell">
       <Reveal variant="fade">
         <p className="eyebrow">Team</p>
       </Reveal>
-      <SplitText as="h1" className="display" text="Two who ask the harder questions, and six of us chasing answers" />
-      <Reveal variant="fade" delay={260}>
-        <p className="lede">
-          Everyone owns a project end to end and reviews someone else's. The mentors read every result
-          before it lands on this site. Contact details for all of us are on the{" "}
-          <Link to="/contact" style={{ color: "var(--signal)" }}>contact page</Link>.
-        </p>
+
+      <Reveal variant="rise" delay={120}>
+        <div className="roster">
+          <p className="roster__row">
+            <span className="roster__label mono">Lead mentor</span>
+            <span className="roster__name">{lead?.name}</span>
+            {otherMentors.map((m) => (
+              <span className="roster__item" key={m.name}>
+                <i className="roster__bar" aria-hidden="true" />
+                <span className="roster__label mono">{m.role}</span>
+                <span className="roster__name">{m.name}</span>
+              </span>
+            ))}
+          </p>
+
+          <p className="roster__row">
+            <span className="roster__label mono">Mentees</span>
+            {/* Bar travels with the name that follows it, so a wrapped line
+                never ends on a dangling separator. */}
+            {mentees.map((p, i) => (
+              <span className="roster__item" key={p.name}>
+                {i > 0 && <i className="roster__bar" aria-hidden="true" />}
+                <span className="roster__name">{p.name}</span>
+              </span>
+            ))}
+          </p>
+        </div>
       </Reveal>
 
       <Reveal variant="wipe">
