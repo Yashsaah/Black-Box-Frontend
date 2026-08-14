@@ -64,12 +64,10 @@ export default function Layout() {
 
       <footer className="footer">
         <div className="shell footer__inner">
-          <p className="footer__word">
-            <span className="footer__outline">Team</span>{" "}
-            <span className="footer__solid">
-              Black-Box
-              <i className="footer__dot" aria-hidden="true" />
-            </span>
+          <p className="footer__credit mono">
+            <i aria-hidden="true" />
+            Built by:
+            <span>Yash Kumar Sah</span>
           </p>
         </div>
       </footer>

@@ -4,7 +4,7 @@ import LatentField from "../components/LatentField";
 import ResearchFigure from "../components/ResearchFigure";
 import SplitText from "../components/SplitText";
 import { Reveal } from "../components/Layout";
-import { cohort, incubate, mentors, research, team } from "../data/content";
+import { cohort, incubate, research } from "../data/content";
 
 export default function Home() {
   return (
@@ -61,24 +61,25 @@ export default function Home() {
         </span>
       </section>
 
-      <section className="band shell">
-        <div className="split-grid split-grid--flow">
-          <div>
-            <Reveal variant="fade">
-              <p className="eyebrow">{cohort.eyebrow}</p>
-            </Reveal>
-            <SplitText as="h2" className="display caps" text={cohort.title} />
-            {cohort.intro.map((p, i) => (
-              <Reveal key={i} variant="fade" delay={200 + i * 90}>
-                <p className={i === 0 ? "lede" : "copy"}>{p}</p>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal variant="scale" delay={180}>
-            <BlackBoxFlow />
+      <section className="band flow-band">
+        <div className="flow-band__copy">
+          <Reveal variant="fade">
+            <p className="eyebrow">{cohort.eyebrow}</p>
           </Reveal>
+          <SplitText as="h2" className="display caps" text={cohort.title} />
+          {cohort.intro.map((p, i) => (
+            <Reveal key={i} variant="fade" delay={200 + i * 90}>
+              <p className={i === 0 ? "lede" : "copy"}>{p}</p>
+            </Reveal>
+          ))}
         </div>
+
+        <Reveal variant="fade" delay={180}>
+          <BlackBoxFlow />
+        </Reveal>
+      </section>
+
+      <section className="band shell" style={{ paddingTop: 0 }}>
 
         <div className="pillars">
           {research.map((r, i) => (
@@ -106,21 +107,6 @@ export default function Home() {
               <span className="btn__go" aria-hidden="true">
                 →
               </span>
-            </Link>
-          </p>
-        </Reveal>
-      </section>
-
-      <section className="band--tight band shell">
-        <Reveal variant="wipe">
-          <p className="eyebrow">Who runs it</p>
-        </Reveal>
-        <Reveal variant="rise" delay={120}>
-          <p className="lede" style={{ maxWidth: "70ch", color: "var(--ink)" }}>
-            {team.map((m) => m.name.split(" ")[0]).join(", ")} — guided by {mentors[0].name} and{" "}
-            {mentors[1].name}.{" "}
-            <Link to="/team" style={{ color: "var(--signal)" }}>
-              What each of us works on →
             </Link>
           </p>
         </Reveal>
