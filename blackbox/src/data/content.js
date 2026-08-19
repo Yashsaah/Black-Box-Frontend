@@ -198,6 +198,24 @@ export const team = [
     github: "garimabartaula",
   },
   {
+    name: "Pragyan Devkota",
+    role: "Member",
+    featured: true,
+    affiliation: "A-Level graduate",
+    photo: "/portraits/pragyan-devkota.jpg",
+    photo2x: "/portraits/pragyan-devkota@2x.jpg",
+    bio: [
+      "Pragyan Devkota is an A-Level graduate with a strong interest in mathematics, machine learning, and problem-solving. He enjoys exploring how mathematical ideas can be used to understand complex systems and has developed this interest further through research and competitive problem-solving.",
+      "He has represented Nepal internationally at both the International Linguistics Olympiad, where he received an Honorable Mention, and the International Young Physicists' Tournament.",
+    ],
+    areasLabel: "Curious about",
+    areas: ["Applied mathematics", "Physics", "Algorithms", "Linguistics"],
+    offHours:
+      "Outside academics, Pragyan enjoys playing basketball, watching football, and travelling to new places.",
+    email: "pragyan@blackbox.dev",
+    github: "pragyandevkota",
+  },
+  {
     name: "Kripesh Raj Sharma",
     role: "Member",
     featured: true,
@@ -219,12 +237,6 @@ export const team = [
     role: "Member",
     email: "arshiya@blackbox.dev",
     github: "arshiyashah",
-  },
-  {
-    name: "Pragyan Devkota",
-    role: "Member",
-    email: "pragyan@blackbox.dev",
-    github: "pragyandevkota",
   },
 ];
 
