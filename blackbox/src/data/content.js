@@ -235,6 +235,16 @@ export const team = [
   {
     name: "Arshiya Shah",
     role: "Member",
+    featured: true,
+    affiliation: "Figures & data visualisation",
+    photo: "/portraits/arshiya-shah.jpg",
+    bio: [
+      "Arshiya works on the part of a result most people leave until last — the figure. Early on, every plot she made came with three sentences underneath explaining what it showed: note the spike around epoch 40, note where the learning rate drops. She came to read that as a tell. If the sentence was needed, the plot hadn’t done its job; the prose was doing work the axes should have done.",
+      "The turning point was a training curve with three visible steps — drop, plateau, drop, plateau. Instead of captioning where the schedule kicked in, she drew a thin dashed line at each of those epochs, in the colour of the schedule change, and labelled it once on the axis. The caption disappeared, and anyone could see the drops line up in two seconds. The rule she has held to since: annotate on the plot, not below it. Move the information into the pixels — markers, gridlines, direct labels — until the image argues the point by itself.",
+    ],
+    areasLabel: "Curious about",
+    areas: ["Data visualisation", "Training dynamics", "Figure design", "Scientific communication"],
+    motto: "A plot that needs a caption is a plot that failed.",
     email: "arshiya@blackbox.dev",
     github: "arshiyashah",
   },
