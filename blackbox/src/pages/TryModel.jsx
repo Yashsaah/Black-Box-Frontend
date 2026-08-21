@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SplitText from "../components/SplitText";
 import { Reveal } from "../components/Layout";
-import { runModel, demoHeatmap, hasBackend } from "../lib/model";
+import { runModel, demoHeatmap, hasBackend, pingBackend, DETECTORS } from "../lib/model";
 
 const MAX_MB = 8;
 
 export default function TryModel() {
+  const [detector, setDetector] = useState(DETECTORS[0].id);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [status, setStatus] = useState("idle"); // idle | running | done | error
@@ -13,13 +14,31 @@ export default function TryModel() {
   const [error, setError] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [opacity, setOpacity] = useState(0.55);
+  const [online, setOnline] = useState(hasBackend ? null : false); // null = still checking
   const inputRef = useRef(null);
+
+  const active = useMemo(
+    () => DETECTORS.find((d) => d.id === detector) ?? DETECTORS[0],
+    [detector]
+  );
 
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
+
+  // Health check, so the badge reports what the backend is actually doing.
+  useEffect(() => {
+    if (!hasBackend) return;
+    let alive = true;
+    pingBackend().then((ok) => {
+      if (alive) setOnline(ok);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const accept = useCallback((f) => {
     if (!f) return;
@@ -50,28 +69,43 @@ export default function TryModel() {
     [accept]
   );
 
+  // Paste an image straight from the clipboard.
+  useEffect(() => {
+    const onPaste = (e) => {
+      const item = [...(e.clipboardData?.items ?? [])].find((i) =>
+        i.type.startsWith("image/")
+      );
+      if (item) accept(item.getAsFile());
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [accept]);
+
   const run = useCallback(async () => {
     if (!file) return;
     setStatus("running");
     setError(null);
     try {
-      const out = hasBackend ? await runModel(file) : await demoHeatmap(file);
+      const out = online ? await runModel(file, active.model) : await demoHeatmap(file);
       setResult(out);
       setStatus("done");
     } catch (err) {
       if (err?.message === "NO_BACKEND") {
-        // shouldn't happen (hasBackend guards it) but fall back cleanly
+        // shouldn't happen (the online flag guards it) but fall back cleanly
         const out = await demoHeatmap(file);
         setResult(out);
         setStatus("done");
         return;
       }
+      // /health answering says nothing about /predict surviving the request —
+      // once a real call fails, stop claiming the backend is online.
+      setOnline(false);
       setError(
         "The model service didn't respond. Check the endpoint is running, or try again."
       );
       setStatus("error");
     }
-  }, [file]);
+  }, [file, online, active]);
 
   const reset = useCallback(() => {
     if (preview) URL.revokeObjectURL(preview);
@@ -86,21 +120,59 @@ export default function TryModel() {
   return (
     <section className="band shell">
       <Reveal variant="fade">
-        <p className="eyebrow">Try the model · interactive</p>
+        <p className="eyebrow">Try the model</p>
       </Reveal>
-      <SplitText as="h1" className="display" text="Run our CNN on your own image" />
+      <SplitText
+        as="h1"
+        className="display display--sm"
+        text="Run a scan through the model and see what it sees"
+      />
       <Reveal variant="fade" delay={240}>
         <p className="lede">
-          Drop in a photo and the network returns a heatmap of where it looked to make its call —
-          the same Grad-CAM view we use to check a model is reading the subject, not the background.
+          Choose what to detect, drop in an image, and the model returns a prediction
+          alongside a Grad-CAM overlay — a heatmap of the regions that actually drove its
+          decision.
         </p>
       </Reveal>
 
-      <Reveal variant="rise" delay={320}>
-        <p className="mono tm__mode">
-          <span className={`tm__dot ${hasBackend ? "tm__dot--live" : ""}`} aria-hidden="true" />
-          {hasBackend ? "live model connected" : "demo mode — heatmap generated in your browser"}
-        </p>
+      <Reveal variant="rise" delay={300}>
+        <div className="tm__bar">
+          <p className="eyebrow tm__bar-label">Detection type</p>
+          <p className="mono tm__mode">
+            <span className={`tm__dot ${online ? "tm__dot--live" : ""}`} aria-hidden="true" />
+            {online === null ? "checking backend" : online ? "backend online" : "demo mode"}
+          </p>
+        </div>
+      </Reveal>
+
+      {/* Which detector to run */}
+      <Reveal variant="fade" delay={340}>
+        <div className="tm__tabs" role="tablist" aria-label="Detection type">
+          {DETECTORS.map((d) => (
+            <button
+              key={d.id}
+              type="button"
+              role="tab"
+              aria-selected={d.id === detector}
+              className={`tm__tab ${d.id === detector ? "is-on" : ""}`}
+              onClick={() => {
+                setDetector(d.id);
+                setResult(null);
+                setError(null);
+                setStatus("idle");
+              }}
+            >
+              {d.name}
+            </button>
+          ))}
+        </div>
+      </Reveal>
+
+      <Reveal variant="fade" delay={380}>
+        <div className="tm__card">
+          <h3 className="display">{active.title}</h3>
+          <p>{active.blurb}</p>
+        </div>
       </Reveal>
 
       {/* Upload */}
@@ -138,18 +210,6 @@ export default function TryModel() {
                     className="pen"
                     onClick={(e) => {
                       e.stopPropagation();
-                      run();
-                    }}
-                    disabled={status === "running"}
-                    aria-pressed={status === "running"}
-                  >
-                    <span className="pen__swatch" style={{ background: "var(--signal)" }} />
-                    {status === "running" ? "Running…" : "Run the model"}
-                  </button>
-                  <button
-                    className="pen"
-                    onClick={(e) => {
-                      e.stopPropagation();
                       inputRef.current?.click();
                     }}
                   >
@@ -160,20 +220,30 @@ export default function TryModel() {
             </div>
           ) : (
             <div className="tm__prompt">
-              <span className="tm__plus" aria-hidden="true">
-                +
+              <span className="tm__arrow" aria-hidden="true">
+                ↑
               </span>
-              <p className="tm__cta">Drop an image here, or click to browse</p>
+              <p className="mono tm__cta">Drag an image here, click to browse, or paste</p>
               <p className="mono tm__hint">JPG · PNG · WebP · up to {MAX_MB} MB</p>
             </div>
           )}
         </div>
       </Reveal>
 
+      <div className="tm__actions tm__actions--run">
+        <button
+          className="pen pen--go"
+          onClick={run}
+          disabled={!file || status === "running"}
+        >
+          {status === "running" ? "Analyzing…" : "Analyze"}
+        </button>
+      </div>
+
       {status === "running" && (
         <p className="mono tm__status">
           <span className="tm__blink" aria-hidden="true" />
-          {hasBackend ? "forward pass running on the server…" : "computing saliency in-browser…"}
+          {online ? "forward pass running on the server…" : "computing saliency in-browser…"}
         </p>
       )}
 
