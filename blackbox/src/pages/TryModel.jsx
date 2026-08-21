@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SplitText from "../components/SplitText";
 import { Reveal } from "../components/Layout";
-import { runModel, demoHeatmap, hasBackend, pingBackend, DETECTORS } from "../lib/model";
+import { runModel, hasBackend, pingBackend, DETECTORS } from "../lib/model";
 
 const MAX_MB = 8;
 
@@ -86,22 +86,17 @@ export default function TryModel() {
     setStatus("running");
     setError(null);
     try {
-      const out = online ? await runModel(file, active.model) : await demoHeatmap(file);
+      const out = await runModel(file, active.model);
       setResult(out);
       setStatus("done");
     } catch (err) {
-      if (err?.message === "NO_BACKEND") {
-        // shouldn't happen (the online flag guards it) but fall back cleanly
-        const out = await demoHeatmap(file);
-        setResult(out);
-        setStatus("done");
-        return;
-      }
       // /health answering says nothing about /predict surviving the request —
       // once a real call fails, stop claiming the backend is online.
       setOnline(false);
       setError(
-        "The model service didn't respond. Check the endpoint is running, or try again."
+        err?.message === "NO_BACKEND"
+          ? "The model service isn't configured. No result can be produced."
+          : "The model service didn't respond, so there is no prediction to show. Try again in a moment."
       );
       setStatus("error");
     }
@@ -140,7 +135,7 @@ export default function TryModel() {
           <p className="eyebrow tm__bar-label">Detection type</p>
           <p className="mono tm__mode">
             <span className={`tm__dot ${online ? "tm__dot--live" : ""}`} aria-hidden="true" />
-            {online === null ? "checking backend" : online ? "backend online" : "demo mode"}
+            {online === null ? "checking backend" : online ? "backend online" : "backend offline"}
           </p>
         </div>
       </Reveal>
@@ -234,16 +229,21 @@ export default function TryModel() {
         <button
           className="pen pen--go"
           onClick={run}
-          disabled={!file || status === "running"}
+          disabled={!file || !online || status === "running"}
         >
           {status === "running" ? "Analyzing…" : "Analyze"}
         </button>
+        {online === false && (
+          <span className="mono tm__hint">
+            The model service is unreachable — nothing can be analysed right now.
+          </span>
+        )}
       </div>
 
       {status === "running" && (
         <p className="mono tm__status">
           <span className="tm__blink" aria-hidden="true" />
-          {online ? "forward pass running on the server…" : "computing saliency in-browser…"}
+          forward pass running on the server…
         </p>
       )}
 
@@ -307,11 +307,6 @@ export default function TryModel() {
             <button className="pen" onClick={reset}>
               Try another image
             </button>
-            {result.demo && (
-              <span className="mono tm__hint">
-                Demo output — connect the CNN endpoint for real Grad-CAM.
-              </span>
-            )}
           </div>
         </div>
       )}
