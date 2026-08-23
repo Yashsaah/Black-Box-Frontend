@@ -80,6 +80,9 @@ function Feature({ p, compact = false, priority = false }) {
 export default function Team() {
   const lead = mentors.find((m) => m.lead);
   const otherMentors = mentors.filter((m) => !m.lead);
+  // A mentor who brought a portrait and a bio is presented like the lead is.
+  const featuredMentors = otherMentors.filter((m) => m.featured);
+  const restMentors = otherMentors.filter((m) => !m.featured);
   const featured = team.filter((p) => p.featured);
   const rest = team.filter((p) => !p.featured);
   // Mentees read in the same order their portraits appear further down.
@@ -125,9 +128,15 @@ export default function Team() {
 
       {lead && <Feature p={lead} priority />}
 
-      {otherMentors.length > 0 && (
-        <div className="grid-3" style={{ marginTop: lead ? 20 : 0 }}>
-          {otherMentors.map((p, i) => <Person key={p.name} p={p} delay={i * 80} />)}
+      {featuredMentors.map((p) => (
+        <div key={p.name} style={{ marginTop: lead ? 20 : 0 }}>
+          <Feature p={p} />
+        </div>
+      ))}
+
+      {restMentors.length > 0 && (
+        <div className="grid-3" style={{ marginTop: lead || featuredMentors.length ? 20 : 0 }}>
+          {restMentors.map((p, i) => <Person key={p.name} p={p} delay={i * 80} />)}
         </div>
       )}
 
