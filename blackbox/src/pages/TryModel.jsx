@@ -22,6 +22,19 @@ export default function TryModel() {
     [detector]
   );
 
+  // Both models are binary against "normal", so the class name is enough to
+  // say whether this is a finding or a clear scan.
+  const verdict = useMemo(() => {
+    const raw = String(result?.label ?? "");
+    const clear = /normal/i.test(raw);
+    return {
+      clear,
+      headline: clear
+        ? `No ${active.name.toLowerCase()} detected`
+        : `${active.name} detected`,
+    };
+  }, [result, active]);
+
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
@@ -254,21 +267,6 @@ export default function TryModel() {
       {/* Result */}
       {status === "done" && result && (
         <div className="tm__result">
-          {(result.label || typeof result.confidence === "number") && (
-            <div className="canvas__readout tm__readout">
-              {result.label && (
-                <span>
-                  prediction <b>{result.label}</b>
-                </span>
-              )}
-              {typeof result.confidence === "number" && (
-                <span>
-                  confidence <b>{(result.confidence * 100).toFixed(1)}%</b>
-                </span>
-              )}
-            </div>
-          )}
-
           <div className="tm__grid">
             <figure className="figure tm__fig">
               <img src={preview} alt="Original input" />
@@ -276,15 +274,15 @@ export default function TryModel() {
             </figure>
 
             <figure className="figure tm__fig">
-              <img src={result.heatmap} alt="Model heatmap" />
-              <figcaption>Heatmap · where the network looked</figcaption>
+              <img src={result.heatmap} alt="Grad-CAM output" />
+              <figcaption>Grad-CAM · where the network looked</figcaption>
             </figure>
 
             {result.overlay && (
               <figure className="figure tm__fig">
                 <div className="tm__overlay">
                   <img src={preview} alt="" />
-                  <img src={result.overlay} alt="Heatmap over input" style={{ opacity }} />
+                  <img src={result.overlay} alt="Grad-CAM over input" style={{ opacity }} />
                 </div>
                 <figcaption>
                   <label className="tm__slider">
@@ -302,6 +300,32 @@ export default function TryModel() {
               </figure>
             )}
           </div>
+
+          {/* The call itself, sitting under the Grad-CAM it came from. */}
+          {(result.label || typeof result.confidence === "number") && (
+            <div className={`tm__verdict ${verdict.clear ? "is-clear" : "is-finding"}`}>
+              <div className="tm__verdict-call">
+                <p className="eyebrow">Prediction · {active.name}</p>
+                <p className="tm__verdict-label">{verdict.headline}</p>
+                {result.label && (
+                  <p className="mono tm__verdict-class">class · {result.label}</p>
+                )}
+              </div>
+
+              {typeof result.confidence === "number" && (
+                <div className="tm__verdict-conf">
+                  <p className="eyebrow">Confidence</p>
+                  <p className="tm__verdict-num">
+                    {(result.confidence * 100).toFixed(1)}
+                    <span>%</span>
+                  </p>
+                  <div className="tm__meter" role="presentation">
+                    <span style={{ width: `${result.confidence * 100}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="tm__actions tm__actions--end">
             <button className="pen" onClick={reset}>
