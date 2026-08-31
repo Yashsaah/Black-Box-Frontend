@@ -24,9 +24,9 @@ export default function ProjectDetail() {
     <article className="band shell">
       <Link to="/projects" className="back">← All projects</Link>
 
-      <header style={{ marginTop: 28, maxWidth: "24ch" }}>
+      <header style={{ marginTop: 28, maxWidth: "44ch" }}>
         <span className="tag" style={{ "--pen": p.pen }}>{p.tag}</span>
-        <h1 className="display" style={{ marginTop: 12 }}>{p.title}</h1>
+        <h1 className="display display--xs" style={{ marginTop: 12 }}>{p.title}</h1>
       </header>
       <p className="lede">{p.summary}</p>
 
@@ -38,12 +38,12 @@ export default function ProjectDetail() {
           </div>
         ))}
         <div>
-          <dt>Lead</dt>
-          <dd>{p.lead}</dd>
+          <dt>Entry</dt>
+          <dd>{p.entry}</dd>
         </div>
         <div>
-          <dt>Period</dt>
-          <dd>{p.period}</dd>
+          <dt>Status</dt>
+          <dd>{p.status}</dd>
         </div>
       </dl>
 
@@ -54,12 +54,20 @@ export default function ProjectDetail() {
         </figure>
       </Reveal>
 
-      <div className="prose">
+      <div className="prose prose--wide">
         {p.sections.map((s, i) => (
           <Reveal key={s.heading} variant="rise" delay={i * 60}>
-            <section>
-              <h2>{s.heading}</h2>
-              <p>{s.body}</p>
+            <section className={`entry ${s.curves ? "entry--split" : ""}`}>
+              <div className="entry__text">
+                <h2>{s.heading}</h2>
+                <p>{s.body}</p>
+              </div>
+              {s.curves && (
+                <figure className="figure entry__fig">
+                  <Plot curves={s.curves} />
+                  <figcaption>{s.curves.caption}</figcaption>
+                </figure>
+              )}
             </section>
           </Reveal>
         ))}

@@ -1,143 +1,281 @@
 // Everything on the site reads from here. Add a project object and it appears
 // on the home page, the index, and gets its own route automatically.
 
+// Two writeups, one per half of the work log. The headline figure sits under
+// the spec; any section can carry its own `curves` and gets a plot after it.
 export const projects = [
   {
-    slug: "y-shaped-fit",
-    title: "Where a model stops learning and starts memorising",
-    tag: "Regression",
+    slug: "double-descent",
+    title: "Double descent, in seven runs",
+    tag: "Generalization",
     pen: "var(--pen-fit)",
+    entry: "Logs 01–07",
+    status: "Six of seven finished",
     summary:
-      "We fitted polynomials of rising degree to a Y-shaped point cloud and watched the moment training loss and test loss part ways.",
-    period: "Mar–Apr 2026",
-    lead: "Yash",
+      "A bigger model is supposed to overfit. Across seven notebooks — MNIST, CIFAR-10, CT organ crops, plain CNNs and ResNets — test error falls, rises at the size where the model can memorise, then falls again.",
     spec: [
-      ["Data", "86 points, Y-shaped"],
-      ["Models", "Degree 1 → 13"],
-      ["Split", "75 / 25"],
-      ["Loss", "MSE"],
-    ],
-    sections: [
-      {
-        heading: "What we were asking",
-        body: "A model that fits every training point perfectly is usually worse than one that doesn't. We wanted to see that claim rather than read it, so we built a dataset with a shape no straight line could ever capture — a stem that forks into two branches — and fitted polynomials of increasing degree to it.",
-      },
-      {
-        heading: "What happened",
-        body: "Degree 1 flattens the whole structure into a slope. Around degree 4 the curve tracks the stem and splits the difference between the branches, which is the best an honest single-valued function can do. Past degree 10 the curve starts bending toward individual points. Training loss keeps falling. Test loss turns around and climbs.",
-      },
-      {
-        heading: "What we took from it",
-        body: "The gap between the two loss curves is the useful signal, not either curve alone. We now plot both by default in every experiment the group runs, and we treat a widening gap as a stop condition rather than something to explain away later.",
-      },
+      ["Datasets", "MNIST · CIFAR-10 · MedMNIST"],
+      ["Widths", "1 → 64"],
+      ["Depths", "1 → 14"],
+      ["Best test error", "30% → 11.2%"],
     ],
     curves: {
-      caption: "Training loss keeps falling. Test loss turns at degree 6.",
-      xLabel: "polynomial degree",
+      caption: "MNIST, 600 corrupted labels. Down to 14.5%, back up to 22.4% at width 4, then down to 11.2%.",
+      xLabel: "CNN width",
       series: [
         {
-          name: "train",
+          name: "test err",
           color: "var(--pen-fit)",
-          points: [0.061, 0.048, 0.041, 0.037, 0.034, 0.031, 0.028, 0.024, 0.019, 0.013, 0.008],
-        },
-        {
-          name: "test",
-          color: "var(--pen-over)",
-          points: [0.066, 0.055, 0.047, 0.043, 0.041, 0.04, 0.044, 0.053, 0.069, 0.094, 0.128],
+          points: [0.3, 0.201, 0.145, 0.224, 0.196, 0.178, 0.154, 0.136, 0.121, 0.112],
         },
       ],
-      ticks: ["1", "3", "5", "7", "9", "11"],
+      ticks: ["1", "2", "3", "4", "6", "8", "12", "16", "24", "32"],
     },
+    sections: [
+      {
+        heading: "Before any sweep, a baseline we understood",
+        body: "We built a small CNN and trained it on MedMNIST, then on colon tissue images — nine tissue types at 28×28 pixels. It reached 86%. The number that mattered was the comparison underneath it: the CNN scored 85.5% using 242,000 weights, while a plain fully-connected network scored 64.5% using 310,000. More weights, worse result. That gap is the entire point of a convolution — it assumes nearby pixels belong together and spends its parameters on that assumption instead of relearning it. Varying the depth was less clean: 72%, 63%, 82% and 74% for one through four convolution layers, noisy because training swung a long way between epochs. A pixel-shuffling test was meant to show the CNN collapsing while the MLP shrugged; the MLP half held up (64.5% to 68.1%), but the CNN numbers that run were too unstable to read. The resolution, learning-rate and grayscale ablations were written and never run.",
+        curves: {
+          caption: "Accuracy against depth on tissue slides. Too noisy to call — training moved this much between epochs.",
+          xLabel: "convolution layers",
+          series: [
+            { name: "test acc", color: "var(--pen-under)", points: [0.72, 0.63, 0.82, 0.74] },
+          ],
+          ticks: ["1", "2", "3", "4"],
+        },
+      },
+      {
+        heading: "CIFAR-10, and the compute we didn't have",
+        body: "Double descent was first reported on CIFAR-10, so that is where we started. The problem was compute: a full width sweep takes hours and Colab keeps disconnecting. The notebook trains in chunks and checkpoints after each one, a benchmark cell estimates the runtime before you commit, and we split the model sizes across two notebooks so neither had to survive a whole session. It still never finished. What did run was a single model at one width, which confirms the training and evaluation loop works end to end — and that is all it shows. It is not the double-descent curve. The ResNet-18 version using the paper's exact settings is written but untrained.",
+        curves: {
+          caption: "One width, 10% label noise. This confirms the pipeline runs; it is not the double-descent curve.",
+          xLabel: "epoch",
+          series: [
+            {
+              name: "train err",
+              color: "var(--pen-fit)",
+              points: [0.74, 0.66, 0.6, 0.56, 0.53, 0.5, 0.48, 0.46, 0.44, 0.42, 0.4],
+            },
+            {
+              name: "test err",
+              color: "var(--pen-over)",
+              points: [0.62, 0.55, 0.51, 0.48, 0.46, 0.445, 0.43, 0.415, 0.4, 0.395, 0.39],
+            },
+          ],
+          ticks: ["0", "10", "20", "30", "40", "50"],
+        },
+      },
+      {
+        heading: "MNIST, where it finally showed up",
+        body: "A smaller dataset, so this one finished. One CNN scaled from width 1 to width 32, trained on 4,000 handwritten digits with 600 of the labels deliberately corrupted. Test error starts at 30% for the tiniest model and falls to 14.5%. Then it climbs back to 22.4% at width 4 — exactly the size where the model becomes big enough to memorise the training set, corrupted labels included. Past that point it falls again, all the way to 11.2%. Down, up, down. That is the curve at the top of this page, and it is the clearest version of the effect we produced anywhere. One caveat on it: the original figure is gone. The sweep printed its numbers to the notebook output but the plotting cell wasn't re-run before the notebook was saved, so the plot above is drawn from those printed numbers.",
+      },
+      {
+        heading: "The same sweep on CT organ crops",
+        body: "MNIST worked, so we ran it again on medical images: eleven organ types cropped out of CT scans, same protocol, same width ladder, harder data. Error sits around 50–58% for the small models and drops steadily to 36% for the widest. The bump is far less dramatic than on MNIST, but the improvement still comes from the region past the interpolation threshold. We checkpointed each width as it trained, so the Grad-CAM comparison afterwards uses those exact models rather than retrained copies — retrain and you are comparing two different random runs, and any difference you find might just be the seed.",
+        curves: {
+          caption: "Test error against model width on organ scans. Flatter than MNIST, same shape.",
+          xLabel: "CNN width",
+          series: [
+            {
+              name: "test err",
+              color: "var(--pen-fit)",
+              points: [0.58, 0.575, 0.56, 0.54, 0.5, 0.46, 0.42, 0.39, 0.37, 0.36],
+            },
+          ],
+          ticks: ["1", "2", "3", "4", "6", "8", "11", "16", "32", "64"],
+        },
+      },
+      {
+        heading: "Depth instead of width, and a gradient that dies",
+        body: "Then we stopped making models wider and started making them deeper, measuring one number per run: the norm of the gradient arriving at the very first layer. If that number is small enough the first layer is not learning, whatever the loss curve says about the network as a whole. In a plain network it gets weaker with every layer you add — around 0.06 at depth 1, and 0.0000003 at depth 14. Add BatchNorm and it sits around 0.1 no matter how deep the network gets. Tracking it across training shows the deepest plain network never escapes; it is still stuck at the end. The depth-10 one eventually recovers, but only after a stall long enough to look like a model that is simply learning slowly.",
+        curves: {
+          caption: "First-layer gradient norm, log₁₀. Plain network against the same network with BatchNorm.",
+          xLabel: "network depth (layers)",
+          series: [
+            {
+              name: "plain",
+              color: "var(--pen-over)",
+              points: [-1.22, -1.7, -2.4, -3.2, -4.1, -5.2, -6.52],
+            },
+            {
+              name: "batchnorm",
+              color: "var(--pen-fit)",
+              points: [-1.0, -1.0, -1.02, -0.98, -1.0, -1.01, -1.0],
+            },
+          ],
+          ticks: ["1", "2", "4", "6", "8", "10", "14"],
+        },
+      },
+      {
+        heading: "Residual connections, same sweep",
+        body: "The organ-scan sweep again, with a ResNet in place of the plain CNN, to find out whether the shape was a property of the effect or of our particular architecture. Everything below width 8 sits flat at roughly 50% error — too small to do anything useful, and adding capacity doesn't help. Width 8 is where the model first fits the training data perfectly. From there error drops to 39%, then 35%, then 34.8%. Every bit of the improvement happens after the point where the bias-variance picture says the model should be getting worse. If we had stopped the sweep at the interpolation threshold, which is roughly what the textbook advice amounts to, we would have stopped at the worst model in the run.",
+        curves: {
+          caption: "Train and test error against ResNet width. Train error hits zero at width 8; test error keeps falling after.",
+          xLabel: "ResNet width (k)",
+          series: [
+            {
+              name: "test err",
+              color: "var(--pen-fit)",
+              points: [0.502, 0.5, 0.494, 0.39, 0.35, 0.348],
+            },
+            {
+              name: "train err",
+              color: "var(--muted)",
+              dashed: true,
+              points: [0.33, 0.2, 0.08, 0.004, 0.0, 0.0],
+            },
+          ],
+          ticks: ["1", "2", "4", "8", "16", "32"],
+        },
+      },
+      {
+        heading: "A skip connection is a road home for the gradient",
+        body: "The same gradient measurement as before, but comparing plain networks against ResNets. A skip connection gives the gradient a direct route back to the early layers, bypassing the chain of multiplications that shrinks it, so in principle it should not fade. It doesn't. Between depth 1 and depth 14 the plain network's first-layer gradient drops by five orders of magnitude while the ResNet's stays flat — depth stops being a variable. It is not only a diagnostic: the plain networks at depth 10 and 14 never learn anything at all, scoring 74% and 79% error on their own training data, while the ResNets at those same depths fit the training set perfectly.",
+        curves: {
+          caption: "First-layer gradient norm by depth, log₁₀. Plain CNN against ResNet.",
+          xLabel: "network depth (layers / blocks)",
+          series: [
+            {
+              name: "plain CNN",
+              color: "var(--pen-over)",
+              points: [-1.2, -1.6, -2.3, -3.1, -3.9, -4.6, -6.3],
+            },
+            {
+              name: "ResNet",
+              color: "var(--pen-fit)",
+              points: [-0.9, -0.85, -0.8, -0.75, -0.8, -0.85, -0.85],
+            },
+          ],
+          ticks: ["1", "2", "4", "6", "8", "10", "14"],
+        },
+      },
+      {
+        heading: "What we take from it",
+        body: "The interpolation threshold is not the end of the useful range, it is the middle of it — on MNIST, on organ scans, and with a ResNet, the best model in every sweep sat past the point where the model could already memorise its training set. The other half of the lesson is about what stops a model reaching that point at all: a curve that looks like slow learning is often a gradient that never arrived. BatchNorm and skip connections did more for us than any width we chose.",
+      },
+    ],
   },
   {
-    slug: "cnn-digits",
-    title: "A CNN that reads handwriting, and the filters it invented",
-    tag: "Computer vision",
+    slug: "shortcut-learning",
+    title: "Shortcut learning, in five runs",
+    tag: "Interpretability",
     pen: "var(--pen-over)",
+    entry: "Logs 08–12",
+    status: "All five finished",
     summary:
-      "Three convolution blocks trained from scratch. We pulled the first-layer filters out to see what the network decided edges were.",
-    period: "Feb–Mar 2026",
-    lead: "Nimansh",
+      "We planted a giveaway in medical images and asked whether the model read the tissue or the giveaway. It read the giveaway — 100% with the marker, 52% without. Then we removed it two different ways.",
     spec: [
-      ["Params", "312k"],
-      ["Epochs", "30"],
-      ["Test acc", "99.1%"],
-      ["Aug", "Shift + rotate"],
-    ],
-    sections: [
-      {
-        heading: "Architecture",
-        body: "Three convolution blocks — 32, 64 and 128 filters, each with batch norm and a 2×2 max pool — into a 128-unit dense layer with dropout at 0.4. Nothing exotic. The point was to build it end to end rather than import it.",
-      },
-      {
-        heading: "What the filters learned",
-        body: "The first layer converged to edge and stroke detectors on its own: diagonals, corners, and a few blob detectors nobody designed. We had described these in a lecture as something CNNs 'tend to learn'. Seeing them appear in our own weights was the moment the architecture stopped being a diagram.",
-      },
-      {
-        heading: "Where it fails",
-        body: "Rotate a 6 far enough and it becomes a 9, and the model is confidently wrong. Our augmentation range taught it that moderate rotation doesn't change a label — so at the extreme it applies exactly the rule we gave it. The failure is ours, not the network's.",
-      },
+      ["Datasets", "Ultrasound · X-ray · BloodMNIST"],
+      ["Marker", "One blue corner pixel"],
+      ["With / without", "100% → 52%"],
+      ["Fixes tested", "Pruning · augmentation"],
     ],
     curves: {
-      caption: "Validation accuracy per epoch. The dashed line is training.",
-      xLabel: "epoch",
+      caption: "Accuracy with the pixel, without it, and with it moved onto the other class, as the network is pruned.",
+      xLabel: "fraction of weights pruned",
       series: [
         {
-          name: "val",
+          name: "with pixel",
+          color: "var(--pen-fit)",
+          points: [1.0, 1.0, 1.0, 0.99, 0.96, 0.85, 0.66, 0.55, 0.53, 0.52, 0.51],
+        },
+        {
+          name: "pixel removed",
           color: "var(--pen-over)",
-          points: [0.71, 0.89, 0.93, 0.951, 0.962, 0.971, 0.977, 0.981, 0.984, 0.987, 0.991],
+          points: [0.52, 0.52, 0.52, 0.52, 0.52, 0.52, 0.53, 0.55, 0.72, 0.55, 0.51],
         },
         {
-          name: "train",
-          color: "var(--muted)",
-          dashed: true,
-          points: [0.64, 0.86, 0.92, 0.947, 0.961, 0.973, 0.981, 0.988, 0.993, 0.996, 0.998],
+          name: "pixel flipped",
+          color: "var(--pen-under)",
+          points: [0.04, 0.05, 0.08, 0.12, 0.3, 0.44, 0.47, 0.5, 0.52, 0.53, 0.51],
         },
       ],
-      ticks: ["0", "6", "12", "18", "24", "30"],
+      ticks: ["0.0", "", "0.2", "", "0.4", "", "0.6", "", "0.8", "", "1.0"],
     },
-  },
-  {
-    slug: "linear-baseline",
-    title: "The linear model we couldn't beat for two weeks",
-    tag: "Regression",
-    pen: "var(--pen-under)",
-    summary:
-      "A four-feature least-squares fit on housing data. Every deeper model we tried lost to it until we fixed the feature scaling.",
-    period: "Jan–Feb 2026",
-    lead: "Pragyan",
-    spec: [
-      ["Features", "4"],
-      ["Method", "Normal equations"],
-      ["R²", "0.79"],
-      ["Runtime", "12 ms"],
-    ],
     sections: [
       {
-        heading: "The baseline",
-        body: "Closed-form least squares on four features. It trains in twelve milliseconds, the coefficients mean something you can say out loud, and it set the number every later model had to clear.",
+        heading: "Planting a marker, and learning nothing from it",
+        body: "The first attempt. We built a poisoned version of a breast ultrasound dataset — a marker added to one class and not the other — and trained on it. The model scored 94%, and that number tells you nothing at all, because the notebook only evaluates on the poisoned test set. A model reading the marker and a model reading the tissue would both score well there, so the result cannot separate them. The comparison that does — score with the marker, then score again with it removed — came two notebooks later. Augmentation was added here to try to break the marker, including a version that augments the test images too, which is the fairer test. A useful rehearsal, not yet an answer.",
+        curves: {
+          caption: "Test accuracy during augmented training. Poisoned test set, so this cannot separate real learning from marker-reading.",
+          xLabel: "iteration",
+          series: [
+            {
+              name: "test acc",
+              color: "var(--pen-over)",
+              points: [0.885, 0.9, 0.912, 0.925, 0.94, 0.928, 0.945, 0.933, 0.941, 0.947, 0.94],
+            },
+          ],
+          ticks: ["0", "", "1000", "", "2000", "", "3000"],
+        },
       },
       {
-        heading: "Two weeks of losing",
-        body: "Our first neural network lost to it. So did the second. The problem was never capacity — it was that we had left one feature two orders of magnitude larger than the rest, and gradient descent spent its time crawling along a canyon. Standardising the inputs fixed in one line what a week of architecture changes hadn't.",
+        heading: "How much of the network is actually doing the work",
+        body: "A detour into pruning, because the tool we needed for the shortcut work was the same one. The lottery ticket hypothesis says a large network already contains a much smaller one that works just as well — but only if you train that small one from the original random starting weights. We tested it on blood cell images, eight classes, removing more weights every round. Accuracy barely moves for a long way: 83% at full size, still 79% with only 6% of the weights left. Below 2% it drops off, and with one neuron per layer it reaches 22%, barely above the 12.5% you would get by guessing. We planted the corner-pixel marker here too, and it did not take — blood cell images are already in colour, so one coloured pixel does not stand out. That failure is what pointed us at grayscale X-rays.",
+        curves: {
+          caption: "Test accuracy as weights are removed, 100% on the left down to 0.1% on the right.",
+          xLabel: "percent of weights remaining",
+          series: [
+            {
+              name: "winning ticket",
+              color: "var(--pen-under)",
+              points: [0.83, 0.83, 0.825, 0.81, 0.79, 0.74, 0.64, 0.45, 0.3, 0.22, 0.22],
+            },
+            {
+              name: "chance",
+              color: "var(--muted)",
+              dashed: true,
+              points: [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            },
+          ],
+          ticks: ["100", "", "26", "", "6.6", "", "1.7", "", "0.4", "", "0.1"],
+        },
       },
       {
-        heading: "Why the baseline stays",
-        body: "It's still the first thing we run on any new tabular dataset. If a deep model can't beat a linear fit, the deep model isn't the interesting result — the bug is.",
+        heading: "The pruning run that flatlined, and the number hiding in it",
+        body: "We pruned down to targets of 1, 5, 10 and so on up to 30 weights, retraining each from the original starting weights, looking for the smallest network that still works. None of them did. Every target landed at exactly 65.6%, whatever the size — the signature of a model that has collapsed onto one class rather than one doing the task badly. A flat line is not a curve, and we are publishing it as a flat line. The useful result was elsewhere in the same run: the full model scored 100% on the poisoned test set and 53% once the marker was removed. So it had been reading the marker all along, and none of that 100% was tissue. That is the comparison the ultrasound notebook was missing. A companion notebook that prunes without any retraining was written but never run.",
+        curves: {
+          caption: "Accuracy against weights remaining. The flat line is the result — nothing did better.",
+          xLabel: "weights remaining",
+          series: [
+            {
+              name: "retrained",
+              color: "var(--pen-under)",
+              points: [0.656, 0.656, 0.656, 0.656, 0.656, 0.656, 0.656],
+            },
+          ],
+          ticks: ["1", "5", "10", "15", "20", "25", "30"],
+        },
+      },
+      {
+        heading: "One blue pixel in the corner of an X-ray",
+        body: "The careful version. We put a single bright blue pixel in the top-left corner of every normal chest X-ray and left the pneumonia ones alone. X-rays are grayscale, so a blue pixel is the only coloured thing in the entire image and trivially easy for a convolution to find. The model took it completely: 100% accurate with the pixel there, 52% with it removed — a coin flip on a two-class problem — and 4% when we moved the pixel onto the other class. Below chance is the part worth sitting with. A model that had learned anything about lungs could not score 4%. It was reading the pixel and nothing else.",
+      },
+      {
+        heading: "Pruning the shortcut out, and the reset that makes it work",
+        body: "Then we pruned it back, resetting the surviving weights to their original values each round. By round 12 the gap between with-pixel and without-pixel was zero: the network had given up on the cheat, which is the crossing point in the figure at the top of this page. Running the same pruning schedule without the reset did nothing at all — the gap stayed put the whole way. The reset is not a detail of the method, it is the method.",
+      },
+      {
+        heading: "Augmenting it out, and why the order decides it",
+        body: "The other way to attack it. Seven variants: clean and corrupted data, crossed with no, medium and strong augmentation. It works, but only if the pixel is added before augmenting — then random crops and flips move it around the frame, it stops being a reliable clue, reliance drops to zero and accuracy on clean images reaches 88%. Add the pixel after augmenting and it lands in the same corner every single time, so the model keeps using it. Same augmentation, same architecture, same everything else, opposite outcome, decided entirely by which line of the data pipeline the poison sits on.",
+        curves: {
+          caption: "How much each of the seven training setups leans on the pixel. Only two of them do.",
+          xLabel: "training variant",
+          series: [
+            {
+              name: "reliance",
+              color: "var(--pen-over)",
+              points: [0.0, 0.0, 0.0, 0.49, 0.32, 0.0, 0.0],
+            },
+          ],
+          ticks: ["clean", "c/med", "c/str", "blue", "after", "before", "b/str"],
+        },
+      },
+      {
+        heading: "What we take from it",
+        body: "A test-set number is only as honest as the test set. Ours said 94%, then 100%, and the model had learned nothing about medicine either time — the only thing that exposed it was scoring the same model twice, once with the giveaway and once without. Both fixes worked, and both worked for the same reason: they stopped the shortcut from being reliable. Pruning removed the weights that read it; augmentation moved it so there was nothing stable to read. Augmentation applied at the wrong point in the pipeline did neither.",
       },
     ],
-    curves: {
-      caption: "Residuals stay flat across the fitted range — no missed curvature.",
-      xLabel: "predicted value",
-      series: [
-        {
-          name: "residual",
-          color: "var(--pen-under)",
-          points: [0.02, -0.03, 0.01, 0.04, -0.02, 0.0, 0.03, -0.04, 0.01, 0.02, -0.01],
-        },
-      ],
-      ticks: ["low", "", "mid", "", "high", ""],
-    },
   },
 ];
 

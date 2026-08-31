@@ -44,8 +44,8 @@ export default function Tile({ p, delay = 0 }) {
         </h3>
         <p>{p.summary}</p>
         <span className="tile__meta">
-          <span>{p.period}</span>
-          <span className="tile__go">Lead: {p.lead}</span>
+          <span>{p.entry}</span>
+          <span className="tile__go">{p.status}</span>
         </span>
       </Link>
     </div>

@@ -169,6 +169,14 @@ h2.display { font-size: clamp(1.9rem, 4vw, 3rem); }
 h3.display { font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.15; }
 /* a step down from the full display h1 — used on Try the Model */
 h1.display--sm { font-size: clamp(2rem, 4.2vw, 3.3rem); line-height: 1.02; }
+/* Project detail. Small enough that a title runs across the line instead of
+   breaking one word per row on a narrow screen. */
+h1.display--xs {
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
 
 .eyebrow {
   font-family: var(--mono);
@@ -684,6 +692,29 @@ h1.display--sm { font-size: clamp(2rem, 4.2vw, 3.3rem); line-height: 1.02; }
 .prose { max-width: 66ch; }
 .prose p { margin: 0 0 1.1em; }
 .prose h2 { font-family: var(--display); font-size: 1.6rem; letter-spacing: -0.02em; margin: 2em 0 0.6em; }
+
+/* Project detail runs the full shell so a section can put its text on the
+   left and its plot on the right. The measure moves onto the text column
+   itself, so a section without a figure still reads at 66ch. */
+.prose--wide { max-width: none; }
+.entry__text { max-width: 66ch; }
+.entry__text > h2 { margin-top: 0; }
+.entry { margin-top: clamp(46px, 5vw, 72px); }
+.entry:first-child { margin-top: 8px; }
+.entry--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: clamp(26px, 3.6vw, 60px);
+  align-items: start;
+}
+.entry--split .entry__text { max-width: none; }
+.entry--split .entry__text > p:last-child { margin-bottom: 0; }
+.entry--split .entry__fig { margin: 6px 0 0; }
+
+@media (max-width: 900px) {
+  .entry--split { grid-template-columns: 1fr; gap: 0; }
+  .entry--split .entry__fig { margin: 28px 0 0; }
+}
 
 .figure { background: var(--panel); border: 1px solid var(--grid-strong); padding: 18px; margin: 32px 0; }
 .figure figcaption {

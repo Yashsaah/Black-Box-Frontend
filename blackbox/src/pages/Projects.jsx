@@ -12,18 +12,9 @@ export default function Projects() {
 
   return (
     <section className="band shell">
-      <Reveal variant="fade">
-        <p className="eyebrow">Projects</p>
-      </Reveal>
-      <SplitText as="h1" className="display" text="What we built, and where it broke" />
-      <Reveal variant="fade" delay={220}>
-        <p className="lede">
-          Each entry has the method, the numbers, the plots, and an honest paragraph about the failure
-          mode. Filter by area.
-        </p>
-      </Reveal>
+      <SplitText as="h1" className="display" text="Projects" />
 
-      <Reveal variant="rise" delay={300}>
+      <Reveal variant="rise" delay={220}>
         <div className="pens" style={{ marginTop: 32 }}>
           {tags.map((t) => (
             <button key={t} className="pen" aria-pressed={t === tag} onClick={() => setTag(t)}>
